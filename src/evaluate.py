@@ -6,14 +6,12 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import torch
-import torch.nn as nn
 from sklearn.metrics import (ConfusionMatrixDisplay, confusion_matrix,
                              precision_recall_fscore_support)
 
 from src.config import Config
 from src.data import get_dataloaders
 from src.models import build_model
-from src.train import evaluate_model
 from src.utils import get_device, get_logger, set_seed
 
 
