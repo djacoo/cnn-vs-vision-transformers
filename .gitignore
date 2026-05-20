@@ -9,8 +9,6 @@ __pycache__/
 experiments/*
 !experiments/.gitkeep
 data/
-report/figures/*
-!report/figures/.gitkeep
 
 # OS / editor
 .DS_Store
