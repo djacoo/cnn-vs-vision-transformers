@@ -1,0 +1,6 @@
+variant,total_params_M,trainable_params_M,train_time_min,epochs_run,best_val_acc,test_acc,macro_precision,macro_recall,macro_f1
+resnet50,23.58,23.5838,6.3,20,0.9497,0.925,0.9267,0.9245,0.9242
+vit_b16_ft,85.83,85.8271,21.4,20,0.9524,0.9368,0.9382,0.9364,0.9358
+vit_s16_scratch,21.68,21.6799,19.5,60,0.2826,0.227,0.2257,0.2272,0.221
+deit_s16_ft,21.68,21.6799,5.8,20,0.947,0.9272,0.9285,0.9268,0.9262
+vit_b16_linprobe,85.83,0.0285,5.2,15,0.947,0.9242,0.9255,0.9239,0.9234
