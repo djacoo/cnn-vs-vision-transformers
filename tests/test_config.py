@@ -45,3 +45,15 @@ def test_load_config_roundtrip(tmp_path):
     path.write_text(yaml_text)
     cfg = load_config(str(path))
     assert cfg.name == "t" and cfg.epochs == 3 and cfg.protocol == "full_ft"
+
+
+import glob
+
+def test_all_shipped_configs_are_valid():
+    paths = sorted(glob.glob("configs/*.yaml"))
+    assert len(paths) == 5
+    names = {load_config(p).name for p in paths}
+    assert names == {
+        "resnet50", "vit_b16_ft", "vit_s16_scratch",
+        "deit_s16_ft", "vit_b16_linprobe",
+    }
