@@ -8,6 +8,7 @@ __pycache__/
 # Project artifacts (large — never commit)
 experiments/*
 !experiments/.gitkeep
+!experiments/RUNS.md
 data/
 
 # OS / editor
