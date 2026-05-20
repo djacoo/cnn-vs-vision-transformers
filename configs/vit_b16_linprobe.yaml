@@ -1,0 +1,7 @@
+name: vit_b16_linprobe
+backbone: vit_base_patch16_224
+pretrained: true
+protocol: linear_probe
+augmentation: light
+lr: 0.001
+epochs: 20

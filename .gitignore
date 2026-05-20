@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+*.egg-info/
+
+# Project artifacts (large — never commit)
+experiments/*
+!experiments/.gitkeep
+!experiments/RUNS.md
+data/
+
+# OS / editor
+.DS_Store
+.ipynb_checkpoints/

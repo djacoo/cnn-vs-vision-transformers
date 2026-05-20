@@ -1,0 +1,8 @@
+name: vit_s16_scratch
+backbone: vit_small_patch16_224
+pretrained: false
+protocol: scratch
+augmentation: randaugment
+lr: 0.0003
+epochs: 60
+patience: 12

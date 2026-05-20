@@ -1,0 +1,7 @@
+name: deit_s16_ft
+backbone: deit_small_patch16_224
+pretrained: true
+protocol: full_ft
+augmentation: light
+lr: 0.0001
+epochs: 20
