@@ -10,6 +10,8 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+> Note: `/opt/homebrew/bin/python3.12` is the Homebrew path on macOS; adjust for your system.
+
 ## Status
 
 Under construction.
