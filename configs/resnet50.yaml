@@ -1,0 +1,7 @@
+name: resnet50
+backbone: resnet50
+pretrained: true
+protocol: full_ft
+augmentation: light
+lr: 0.0001
+epochs: 20
