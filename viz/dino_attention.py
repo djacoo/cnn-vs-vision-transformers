@@ -65,27 +65,30 @@ def render_dino_figure(model, images: torch.Tensor, out_path: str,
         axes = axes[None, :]
 
     extractor = ViTAttentionExtractor(model)
-    for r in range(rows):
-        img = images[r:r + 1]
-        heads = _heads_from_attentions(extractor(img), grid_size)
-        axes[r, 0].imshow(denormalize(images[r]).permute(1, 2, 0))
-        for h in range(n_heads):
-            heat = torch.nn.functional.interpolate(
-                heads[h][None, None], size=images.shape[-2:],
-                mode="bilinear", align_corners=False)[0, 0]
-            axes[r, 1 + h].imshow(overlay_heatmap(images[r], heat))
-        mean_map = heads.mean(0)
-        mean_map = torch.nn.functional.interpolate(
-            mean_map[None, None], size=images.shape[-2:],
-            mode="bilinear", align_corners=False)[0, 0]
-        axes[r, -1].imshow(overlay_heatmap(images[r], mean_map))
-        if r == 0:
-            axes[r, 0].set_title("input")
+    try:
+        for r in range(rows):
+            img = images[r:r + 1]
+            heads = _heads_from_attentions(extractor(img), grid_size)
+            axes[r, 0].imshow(denormalize(images[r]).permute(1, 2, 0))
             for h in range(n_heads):
-                axes[r, 1 + h].set_title(f"head {h}")
-            axes[r, -1].set_title("mean")
-        for c in range(cols):
-            axes[r, c].axis("off")
+                heat = torch.nn.functional.interpolate(
+                    heads[h][None, None], size=images.shape[-2:],
+                    mode="bilinear", align_corners=False)[0, 0]
+                axes[r, 1 + h].imshow(overlay_heatmap(images[r], heat))
+            mean_map = heads.mean(0)
+            mean_map = torch.nn.functional.interpolate(
+                mean_map[None, None], size=images.shape[-2:],
+                mode="bilinear", align_corners=False)[0, 0]
+            axes[r, -1].imshow(overlay_heatmap(images[r], mean_map))
+            if r == 0:
+                axes[r, 0].set_title("input")
+                for h in range(n_heads):
+                    axes[r, 1 + h].set_title(f"head {h}")
+                axes[r, -1].set_title("mean")
+            for c in range(cols):
+                axes[r, c].axis("off")
+    finally:
+        extractor.remove_hooks()
 
     fig.tight_layout()
     Path(out_path).parent.mkdir(parents=True, exist_ok=True)
