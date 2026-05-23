@@ -42,7 +42,7 @@ def _build_text_features(model, tokenizer, class_names, templates, device):
 
 
 @torch.no_grad()
-def zero_shot_evaluate(model_name="ViT-B-32", pretrained="openai",
+def zero_shot_evaluate(model_name="ViT-B-32-quickgelu", pretrained="openai",
                        templates=None, out_dir="experiments/clip_zeroshot",
                        data_root="data", batch_size=32, num_workers=4,
                        seed=42):
@@ -98,7 +98,7 @@ def zero_shot_evaluate(model_name="ViT-B-32", pretrained="openai",
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", default="ViT-B-32")
+    parser.add_argument("--model", default="ViT-B-32-quickgelu")
     parser.add_argument("--pretrained", default="openai")
     parser.add_argument("--out-dir", default="experiments/clip_zeroshot")
     args = parser.parse_args()
