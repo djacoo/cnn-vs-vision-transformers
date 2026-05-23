@@ -36,17 +36,17 @@ Per-row notes:
 | Variant / Analysis | Backbone | Protocol | Test acc | Macro F1 | Trainable | Train time | Notes |
 |---|---|---|---|---|---|---|---|
 | `vit_s16_dino_linprobe` | ViT-S/16 | DINO self-sup pretraining → linear probe | **0.9081** | 0.9076 | 0.014 M | 117 s | Best val acc 0.9375 at epoch 9; 17 epochs run before early stop |
-| `clip_zeroshot` | CLIP ViT-B/32 | zero-shot inference (no training) | **0.8348** | — | 0 | inference only | 4-template prompt ensemble; CLIP's own preprocessing; `n_test=3669` |
+| `clip_zeroshot` | CLIP ViT-B/32 | zero-shot inference (no training) | **0.8842** | — | 0 | inference only | 4-template prompt ensemble; CLIP's own preprocessing; `n_test=3669`; ViT-B-32-quickgelu weights to match OpenAI's QuickGELU activation (+4.94 pp vs non-QuickGELU checkpoint) |
 
 CLIP templates (averaged in text-embedding space): `"a photo of a {}, a type of pet."`, `"a photo of a {}."`, `"a picture of a {} pet."`, `"an image of a {} cat or dog."`.
 
-**Interpretation.** DINO self-supervised features (no labels in pretraining) match the supervised linear probe within 1.6 pp at half the parameters and 1/3 the training time — self-supervision transfers nearly losslessly on this dataset. CLIP, with *zero* fine-tuning, still reaches 83.5% accuracy on 37 fine-grained breeds; vision-language pretraining is a strong free baseline whenever class names are descriptive.
+**Interpretation.** DINO self-supervised features (no labels in pretraining) match the supervised linear probe within 1.6 pp at half the parameters and 1/3 the training time — self-supervision transfers nearly losslessly on this dataset. CLIP, with *zero* fine-tuning, reaches 88.4% accuracy on 37 fine-grained breeds using the canonical QuickGELU weights; vision-language pretraining is a strong free baseline whenever class names are descriptive.
 
 ---
 
-## 3. Saliency metrics runs (5)
+## 3. Saliency metrics runs (6)
 
-200 validation images per variant; Grad-CAM for the CNN, attention rollout for ViT/DeiT/DINO. `vit_s16_scratch` skipped (0.23 accuracy makes its saliency meaningless).
+200 validation images per variant; Grad-CAM for the CNN, attention rollout for ViT/DeiT/DINO. `vit_s16_scratch` is now included; see interpretation note below for its metric-artifact caveat.
 
 | Variant | Pointing Game ↑ | Bbox-IoU @ top-20 ↑ | Deletion AUC ↓ | Insertion AUC ↑ |
 |---|---|---|---|---|
@@ -55,8 +55,11 @@ CLIP templates (averaged in text-embedding space): `"a photo of a {}, a type of 
 | `deit_s16_ft` | 0.605 | 0.267 | 0.351 | 0.648 |
 | `vit_b16_linprobe` | 0.345 | 0.197 | 0.342 | 0.463 |
 | `vit_s16_dino_linprobe` | 0.640 | 0.280 | **0.231** | 0.556 |
+| `vit_s16_scratch` | 0.365 | 0.179 | 0.090 | 0.147 |
 
 **Interpretation.** Grad-CAM on ResNet-50 substantially outperforms ViT attention rollout as a localizer (Pointing Game 0.78 vs 0.42 — a 36-point gap). Within ViTs, DINO self-supervised attention is the most object-centric (best deletion AUC across all variants), confirming the DINO paper's emergent-segmentation claim. **Attention ≠ saliency** is real and measurable.
+
+`vit_s16_scratch` caveat: the deletion AUC of 0.090 is a measurement artifact. Deletion AUC is the area under the prob-vs-pixels-removed curve; when the model's baseline probability on the correct class is already near random (1/37 ≈ 0.027), that curve has almost no area mechanically — not because the saliency is good. The insertion AUC (0.147) is the honest metric: revealing the top-salient pixels barely recovers the prediction above chance, confirming there is no class-specific signal to recover.
 
 ---
 
@@ -87,7 +90,7 @@ Raw per-run CSV: `experiments_data_eff/results.csv`.
 | `report/figures/dino_attention.png` | `viz/dino_attention.py` on `vit_s16_dino_linprobe` | 6 pet images × per-head + mean attention from last block |
 | `report/figures/tsne_embeddings.png` | `viz/embeddings.py` | 4 variants (`resnet50`, `vit_b16_ft`, `vit_s16_scratch`, `vit_s16_dino_linprobe`), colored by class |
 | `report/figures/failure_cases.png` | `viz/failures.py` | Top-5 most-confused breed pairs in ViT-B FT confusion matrix |
-| `report/figures/saliency_metrics.png` | `viz/saliency_metrics_plot.py` | Bar chart of 4 metrics × 5 variants |
+| `report/figures/saliency_metrics.png` | `viz/saliency_metrics_plot.py` | Bar chart of 4 metrics × 6 variants (scratch now included) |
 
 ---
 

@@ -8,7 +8,7 @@ A comparative study of CNN and Vision-Transformer image classifiers on the Oxfor
 
 ## Abstract
 
-Pretrained CNNs and pretrained ViTs reach near-identical accuracy on 37-class Oxford-IIIT Pets (~0.92–0.94 test accuracy), yet they rely on fundamentally different mechanisms: convolutional inductive bias versus learned self-attention. This project trains five baseline variants (ResNet-50, ViT-B/16, ViT-S/16 from scratch, DeiT-S/16, ViT-B/16 linear probe) under a unified training loop, then extends the study with six analyses: a sixth DINO self-supervised variant, a CLIP zero-shot baseline, per-head DINO attention visualization, quantitative saliency metrics, a data-efficiency sweep, t-SNE feature embeddings, and a failure-case mosaic. The headline findings: all pretrained variants converge to ~0.92–0.94 accuracy regardless of architecture; the from-scratch ViT collapses to 0.227 ("data hunger"); ViT-B linear probe wins at 10% data; DINO self-supervised features and CLIP zero-shot both transfer remarkably well; and **Grad-CAM on a CNN substantially outperforms ViT attention rollout as a localizer** (pointing game 0.78 vs 0.42), making "attention ≠ saliency" not a slogan but a measured 36-point gap.
+Pretrained CNNs and pretrained ViTs reach near-identical accuracy on 37-class Oxford-IIIT Pets (~0.92–0.94 test accuracy), yet they rely on fundamentally different mechanisms: convolutional inductive bias versus learned self-attention. This project trains five baseline variants (ResNet-50, ViT-B/16, ViT-S/16 from scratch, DeiT-S/16, ViT-B/16 linear probe) under a unified training loop, then extends the study with six analyses: a sixth DINO self-supervised variant, a CLIP zero-shot baseline, per-head DINO attention visualization, quantitative saliency metrics, a data-efficiency sweep, t-SNE feature embeddings, and a failure-case mosaic. The headline findings: all pretrained variants converge to ~0.92–0.94 accuracy regardless of architecture; the from-scratch ViT collapses to 0.227 ("data hunger"); ViT-B linear probe wins at 10% data; DINO self-supervised features and CLIP zero-shot (~0.88 with canonical QuickGELU weights) both transfer remarkably well; and **Grad-CAM on a CNN substantially outperforms ViT attention rollout as a localizer** (pointing game 0.78 vs 0.42), making "attention ≠ saliency" not a slogan but a measured 36-point gap.
 
 ---
 
@@ -94,7 +94,7 @@ Per-variant artifacts (confusion matrix, training curves) live in `report/figure
 Six additional analyses, each tied to a course lecture topic.
 
 1. **DINO self-supervised 6th variant (`vit_s16_dino_linprobe`)** — ViT-S/16 with DINO ImageNet-pretrained weights, frozen backbone, trained only via a 14 k-parameter linear head. Probes whether self-supervised features (no labels in pretraining) match supervised ones for transfer. *Lecture 5B — Self-Supervised Learning.* Reaches **0.9081** test accuracy in 117 seconds, on par with the supervised linear probe.
-2. **CLIP zero-shot baseline (`src/clip_zeroshot.py`)** — OpenAI CLIP ViT-B/32 with a 4-template prompt ensemble: `"a photo of a {}, a type of pet."`, `"a photo of a {}."`, `"a picture of a {} pet."`, `"an image of a {} cat or dog."`. No training. *Lecture 10 — Vision-Language Models.* Reaches **0.8348** test accuracy out of the box.
+2. **CLIP zero-shot baseline (`src/clip_zeroshot.py`)** — OpenAI CLIP ViT-B/32 (QuickGELU weights) with a 4-template prompt ensemble: `"a photo of a {}, a type of pet."`, `"a photo of a {}."`, `"a picture of a {} pet."`, `"an image of a {} cat or dog."`. No training. *Lecture 10 — Vision-Language Models.* Reaches **0.8842** test accuracy out of the box.
 3. **DINO per-head attention visualization (`viz/dino_attention.py`)** — extracts the last block's per-head CLS-token attention, upsamples to image resolution, and renders the per-head + mean attention overlaid on six pet images. Demonstrates the emergent object-centric attention claim from the DINO paper.
 4. **Quantitative saliency metrics (`src/saliency_metrics.py`)** — computes Pointing Game, Bbox-IoU @ top-k, Deletion AUC and Insertion AUC against Oxford-IIIT Pet head bounding boxes (`src/pet_bboxes.py`) on 200 validation images per variant. *Closes the loop on "where is the model looking?" by replacing eyeballing with numbers.*
 5. **Data-efficiency sweep (`src/data_efficiency.py`)** — re-trains each supervised variant at 10 / 25 / 50 / 100% training fractions (stratified subsample) and records test accuracy. *Lecture 7A — Transfer Learning.* Quantifies how much each architecture/protocol benefits from more labels.
@@ -117,13 +117,13 @@ DINO ImageNet-pretrained ViT-S/16 features, classified with a 14 k-parameter lin
 
 | Model | Pretraining | Templates | Test acc | n_test |
 |---|---|---|---|---|
-| CLIP ViT-B/32 (OpenAI) | image-text contrastive | 4 (ensembled) | **0.8348** | 3,669 |
+| CLIP ViT-B/32-QuickGELU (OpenAI) | image-text contrastive | 4 (ensembled) | **0.8842** | 3,669 |
 
-CLIP reaches 83.5% accuracy on 37 fine-grained pet breeds **without seeing a single Pets training image**. Prompt ensembling alone — averaging four templates — closes much of the gap to supervised training. Vision-language pretraining is a strong fine-grained classification baseline whenever class names are descriptive.
+CLIP reaches 88.4% accuracy on 37 fine-grained pet breeds **without seeing a single Pets training image**. The canonical OpenAI weights use a QuickGELU activation (ViT-B-32-quickgelu); switching from the default GELU checkpoint to QuickGELU accounts for a +4.94 pp improvement. Prompt ensembling alone — averaging four templates — closes much of the gap to supervised training. Vision-language pretraining is a strong fine-grained classification baseline whenever class names are descriptive.
 
 ### Quantitative saliency metrics
 
-200 validation images per variant; Grad-CAM for the CNN, attention rollout for ViT/DeiT/DINO. `vit_s16_scratch` is skipped — its 0.23 accuracy makes saliency meaningless.
+200 validation images per variant; Grad-CAM for the CNN, attention rollout for ViT/DeiT/DINO. `vit_s16_scratch` is included for completeness but its metrics require careful interpretation (see note below).
 
 | Variant | Pointing Game ↑ | Bbox-IoU @ top-20 ↑ | Deletion AUC ↓ | Insertion AUC ↑ |
 |---|---|---|---|---|
@@ -132,8 +132,11 @@ CLIP reaches 83.5% accuracy on 37 fine-grained pet breeds **without seeing a sin
 | `deit_s16_ft` | 0.605 | 0.267 | 0.351 | 0.648 |
 | `vit_b16_linprobe` | 0.345 | 0.197 | 0.342 | 0.463 |
 | `vit_s16_dino_linprobe` | 0.640 | 0.280 | **0.231** | 0.556 |
+| `vit_s16_scratch` | 0.365 | 0.179 | 0.090 | 0.147 |
 
 The headline result: **Grad-CAM on ResNet-50 substantially outperforms attention rollout on any ViT for object localization** — pointing game 0.78 vs 0.42 for ViT-B FT (a 36-point gap), insertion AUC 0.76 vs 0.57. Within ViTs, **DINO self-supervised attention is the most object-centric** (pointing 0.64, deletion AUC 0.231 — best across all variants), confirming the DINO paper's claim that emergent attention from self-supervision is more aligned with foreground objects than supervised attention. Attention maps are not interchangeable with saliency: the difference is real and measurable.
+
+**Note on `vit_s16_scratch` saliency metrics.** The deletion AUC of 0.090 looks deceptively good but is a measurement artifact: deletion AUC is the *area* under the probability-vs-pixels-removed curve. When the model's baseline probability on the correct class is already near random (1/37 ≈ 0.027), the curve has almost no area to begin with — mechanically producing a near-zero AUC regardless of saliency quality. The honest metric is insertion AUC (0.147): revealing the top-salient pixels barely recovers the prediction above chance, confirming there is no class-specific signal to recover. The scratch model's attention maps carry no meaningful localization information.
 
 ![Saliency metrics bar chart](report/figures/saliency_metrics.png)
 
