@@ -1,11 +1,10 @@
 # Experiment Run Summary
 
-**Date range:** May 20–23, 2026
 **Hardware:** MacBook Pro M3 Max, 48 GB unified memory, PyTorch MPS backend
 **Seed:** 42 (deterministic dataloaders, fixed stratified val split)
 **Dataset:** Oxford-IIIT Pets (37 classes, ~7,400 images; official trainval / test split; local 80/20 stratified train/val)
 
-All checkpoints, TensorBoard logs, and per-run JSON artifacts live under `experiments/<variant>/` (gitignored except for this file and `.gitkeep`). The data-efficiency sweep lives under `experiments_data_eff/`. The implementation plan for the extensions is at `docs/superpowers/plans/2026-05-23-extensions-ssl-clip-saliency-data-efficiency.md`.
+All checkpoints, TensorBoard logs, and per-run JSON artifacts live under `experiments/<variant>/` (gitignored except for this file). The data-efficiency sweep lives under `experiments_data_eff/`.
 
 ---
 
