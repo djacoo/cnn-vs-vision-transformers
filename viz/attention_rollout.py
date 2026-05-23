@@ -9,19 +9,31 @@ class ViTAttentionExtractor:
         self.model = model
         self.model.eval()
         self._attentions: list[torch.Tensor] = []
+        self._handles: list[torch.utils.hooks.RemovableHandle] = []
         for block in model.blocks:
             block.attn.fused_attn = False  # force explicit softmax path
-            block.attn.attn_drop.register_forward_hook(self._save)
+            self._handles.append(
+                block.attn.attn_drop.register_forward_hook(self._save))
 
     def _save(self, _module, inp, _output):
-        # inp[0] is the (B, heads, tokens, tokens) attention matrix
         self._attentions.append(inp[0].detach())
+
+    def remove_hooks(self) -> None:
+        for h in self._handles:
+            h.remove()
+        self._handles = []
 
     @torch.no_grad()
     def __call__(self, image: torch.Tensor) -> list[torch.Tensor]:
         self._attentions = []
         self.model(image)
         return list(self._attentions)
+
+    def __del__(self):
+        try:
+            self.remove_hooks()
+        except Exception:
+            pass
 
 
 def attention_rollout(attentions: list[torch.Tensor], grid_size: int) -> torch.Tensor:
@@ -45,6 +57,10 @@ def attention_rollout(attentions: list[torch.Tensor], grid_size: int) -> torch.T
 
 
 def rollout_heatmap_for_image(model, image: torch.Tensor, grid_size: int = 14) -> torch.Tensor:
-    """Convenience: extract attention and roll it up for one image."""
-    attentions = ViTAttentionExtractor(model)(image)
-    return attention_rollout(attentions, grid_size)
+    """Convenience: extract attention, roll it up for one image, clean up hooks."""
+    extractor = ViTAttentionExtractor(model)
+    try:
+        attentions = extractor(image)
+        return attention_rollout(attentions, grid_size)
+    finally:
+        extractor.remove_hooks()

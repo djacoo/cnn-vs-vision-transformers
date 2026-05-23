@@ -1,0 +1,7 @@
+name: vit_s16_dino_linprobe
+backbone: vit_small_patch16_224.dino
+pretrained: true
+protocol: linear_probe
+augmentation: light
+lr: 0.001
+epochs: 20
