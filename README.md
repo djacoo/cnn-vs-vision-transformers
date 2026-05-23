@@ -312,7 +312,7 @@ notebooks/results_analysis.ipynb
 experiments/                   # gitignored except RUNS.md + .gitkeep
 experiments_data_eff/          # 20 data-efficiency run dirs + results.csv
 report/figures/                # committed figures and CSV
-docs/                          # exam assignment PDF + superpowers/ plans
+docs/                          # exam assignment PDF + project spec
 ```
 
 ---

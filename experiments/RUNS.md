@@ -99,4 +99,3 @@ Raw per-run CSV: `experiments_data_eff/results.csv`.
 - Global seed `42` via `src/utils.set_seed`, deterministic dataloaders, fixed stratified train/val split.
 - MPS backend on Apple Silicon; CPU fallback works elsewhere; CUDA path untested but should require no changes.
 - `experiments/` is gitignored except for `RUNS.md` and `.gitkeep`. `experiments_data_eff/` holds the 20 data-efficiency run directories plus `results.csv` and is also kept out of version control.
-- Extensions implementation plan: `docs/superpowers/plans/2026-05-23-extensions-ssl-clip-saliency-data-efficiency.md`.
