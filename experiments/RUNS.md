@@ -19,3 +19,19 @@ Metrics below are **validation** accuracy (held-out test metrics are produced by
 - **Full fine-tune vs linear probe (2 vs 5):** linear probing only the 28k-parameter head reaches 0.947 — within 0.5 pp of full fine-tuning — and early-stopped at epoch 14. Frozen ImageNet features are already strongly transferable to Pets.
 
 All checkpoints, TensorBoard logs, and per-run JSON artifacts live under `experiments/<variant>/` (gitignored).
+
+## Deferred runs (extensions branch)
+
+The following runs are wired up in code but not yet executed in this checkpoint:
+
+| Variant / Analysis | Command | Output |
+|---|---|---|
+| `vit_s16_dino_linprobe` | `python -m src.train --config configs/vit_s16_dino_linprobe.yaml` | `experiments/vit_s16_dino_linprobe/` |
+| CLIP zero-shot | `python -m src.clip_zeroshot` | `experiments/clip_zeroshot/test_metrics.json` |
+| Saliency metrics | `python -m src.saliency_metrics --run-dir experiments/<variant>` | `<run-dir>/saliency_metrics.json` |
+| Data-efficiency sweep | `python -m src.data_efficiency` | `experiments_data_eff/results.csv` |
+| t-SNE panel | see README → Reproducing each analysis | `report/figures/tsne_embeddings.png` |
+| Failure mosaic | `python -m viz.failures` | `report/figures/failure_cases.png` |
+| DINO attention figure | see README → Reproducing each analysis | `report/figures/dino_attention.png` |
+
+See `docs/superpowers/plans/2026-05-23-extensions-ssl-clip-saliency-data-efficiency.md` for the implementation plan.
