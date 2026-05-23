@@ -67,9 +67,9 @@ import glob
 
 def test_all_shipped_configs_are_valid():
     paths = sorted(glob.glob("configs/*.yaml"))
-    assert len(paths) == 5
+    assert len(paths) == 6
     names = {load_config(p).name for p in paths}
     assert names == {
         "resnet50", "vit_b16_ft", "vit_s16_scratch",
-        "deit_s16_ft", "vit_b16_linprobe",
+        "deit_s16_ft", "vit_b16_linprobe", "vit_s16_dino_linprobe",
     }
