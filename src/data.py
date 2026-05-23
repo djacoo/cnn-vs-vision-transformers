@@ -19,6 +19,16 @@ def stratified_split(labels, val_fraction, seed):
     return train_idx.tolist(), val_idx.tolist()
 
 
+def stratified_subsample(labels, indices, fraction, seed):
+    """Return a stratified subsample of `indices` keeping `fraction` per class."""
+    if fraction >= 1.0:
+        return list(indices)
+    sub_labels = [labels[i] for i in indices]
+    splitter = StratifiedShuffleSplit(n_splits=1, train_size=fraction, random_state=seed)
+    keep_local, _ = next(splitter.split(list(range(len(indices))), sub_labels))
+    return [indices[k] for k in keep_local]
+
+
 def build_transforms(cfg: Config, train: bool):
     normalize = transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD)
     if not train:
@@ -62,6 +72,7 @@ def get_dataloaders(cfg: Config):
 
     labels = list(trainval_train._labels)
     train_idx, val_idx = stratified_split(labels, cfg.val_fraction, cfg.seed)
+    train_idx = stratified_subsample(labels, train_idx, cfg.train_fraction, cfg.seed)
     train_ds = Subset(trainval_train, train_idx)
     val_ds = Subset(trainval_eval, val_idx)
 

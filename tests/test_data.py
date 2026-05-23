@@ -2,7 +2,7 @@ import pytest
 import torch
 
 from src.config import Config
-from src.data import stratified_split, build_transforms
+from src.data import stratified_split, stratified_subsample, build_transforms
 
 
 def _labels(n_classes=37, per_class=20):
@@ -51,6 +51,22 @@ def test_eval_transform_outputs_correct_tensor_shape():
     tf = build_transforms(_cfg(), train=False)
     out = tf(Image.new("RGB", (300, 250)))
     assert out.shape == (3, 224, 224)
+
+
+def test_stratified_subsample_keeps_all_classes():
+    labels = [i % 37 for i in range(3700)]
+    full_train_idx, _ = stratified_split(labels, val_fraction=0.2, seed=42)
+    sub = stratified_subsample(labels, full_train_idx, fraction=0.25, seed=42)
+    sub_labels = [labels[i] for i in sub]
+    assert len(sub) == pytest.approx(len(full_train_idx) * 0.25, abs=37)
+    assert len(set(sub_labels)) == 37
+
+
+def test_stratified_subsample_passthrough_when_fraction_one():
+    labels = [i % 37 for i in range(370)]
+    full_train_idx, _ = stratified_split(labels, val_fraction=0.2, seed=42)
+    sub = stratified_subsample(labels, full_train_idx, fraction=1.0, seed=42)
+    assert sub == list(full_train_idx)
 
 
 @pytest.mark.slow

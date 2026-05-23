@@ -27,6 +27,7 @@ class Config:
     seed: int = 42
     num_workers: int = 4
     val_fraction: float = 0.2
+    train_fraction: float = 1.0
     data_root: str = "data"
     experiments_dir: str = "experiments"
 
@@ -41,6 +42,8 @@ class Config:
             raise ValueError(f"protocol {self.protocol!r} requires pretrained=True")
         if self.epochs <= 0:
             raise ValueError("epochs must be positive")
+        if not 0.0 < self.train_fraction <= 1.0:
+            raise ValueError("train_fraction must be in (0, 1]")
         return self
 
     def to_dict(self) -> dict:

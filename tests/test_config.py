@@ -47,6 +47,22 @@ def test_load_config_roundtrip(tmp_path):
     assert cfg.name == "t" and cfg.epochs == 3 and cfg.protocol == "full_ft"
 
 
+def test_train_fraction_default_is_one():
+    cfg = Config(name="x", backbone="resnet50", pretrained=True,
+                 protocol="full_ft", augmentation="light", lr=1e-4, epochs=1)
+    assert cfg.train_fraction == 1.0
+
+
+def test_train_fraction_must_be_in_range():
+    base = dict(name="x", backbone="resnet50", pretrained=True,
+                protocol="full_ft", augmentation="light", lr=1e-4, epochs=1)
+    with pytest.raises(ValueError):
+        Config(**base, train_fraction=0.0).validate()
+    with pytest.raises(ValueError):
+        Config(**base, train_fraction=1.5).validate()
+    Config(**base, train_fraction=0.1).validate()
+
+
 import glob
 
 def test_all_shipped_configs_are_valid():
