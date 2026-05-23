@@ -1,7 +1,6 @@
 """Train each variant at multiple train_fractions; aggregate results into a CSV."""
 import argparse
 import csv
-import json
 from pathlib import Path
 
 from src.config import load_config

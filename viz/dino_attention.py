@@ -10,8 +10,12 @@ def last_block_attention_heads(model, image: torch.Tensor,
 
     Returns (n_heads, grid_size, grid_size), each head normalized to [0, 1].
     """
-    attentions = ViTAttentionExtractor(model)(image)
-    return _heads_from_attentions(attentions, grid_size)
+    extractor = ViTAttentionExtractor(model)
+    try:
+        attentions = extractor(image)
+        return _heads_from_attentions(attentions, grid_size)
+    finally:
+        extractor.remove_hooks()
 
 
 def _heads_from_attentions(attentions, grid_size):

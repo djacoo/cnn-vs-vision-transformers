@@ -1,5 +1,3 @@
-import pytest
-
 from src.clip_zeroshot import build_prompts
 
 
