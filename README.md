@@ -125,9 +125,9 @@ DINO ImageNet-pretrained ViT-S/16 features, classified with a 14 k-parameter lin
 
 ### CLIP zero-shot
 
-| Model | Pretraining | Templates | Test acc | n_test |
-|---|---|---|---|---|
-| CLIP ViT-B/32-QuickGELU (OpenAI) | image-text contrastive | 4 (ensembled) | **0.8842** | 3,669 |
+| Model | Pretraining | Templates | Test acc | Macro F1 | n_test |
+|---|---|---|---|---|---|
+| CLIP ViT-B/32-QuickGELU (OpenAI) | image-text contrastive | 4 (ensembled) | **0.8842** | 0.8813 | 3,669 |
 
 CLIP reaches 88.4% accuracy on 37 fine-grained pet breeds **without seeing a single Pets training image**. The canonical OpenAI weights use a QuickGELU activation (ViT-B-32-quickgelu); switching from the default GELU checkpoint to QuickGELU accounts for a +4.94 pp improvement. Prompt ensembling alone — averaging four templates — closes much of the gap to supervised training. Vision-language pretraining is a strong fine-grained classification baseline whenever class names are descriptive.
 
@@ -192,7 +192,13 @@ The five most-confused breed pairs in the ViT-B FT confusion matrix (e.g. Americ
 
 ![Accuracy vs params and training time](report/figures/accuracy_vs_params.png)
 
-Scatter of test accuracy against total parameters (left) and training time (right) for the five baseline variants. DeiT-S/16 FT is the Pareto-best on both axes among full fine-tunes; the linear probe is the Pareto-best on training time at no meaningful accuracy loss.
+Scatter of test accuracy against total parameters (left, all 7 variants including CLIP) and training time (right, training-only variants — CLIP excluded to avoid zero-distortion). DeiT-S/16 FT is the Pareto-best on both axes among full fine-tunes; the linear probe is the Pareto-best on training time at no meaningful accuracy loss.
+
+### Multi-method saliency comparison
+
+![Multi-method saliency comparison](report/figures/multi_method_comparison.png)
+
+For 6 test images, side by side: **original | ResNet-50 Grad-CAM | ViT-B/16 fine-tune rollout | ViT-B/16 linear probe rollout | DINO ViT-S/16 rollout**. Grad-CAM maps are consistently tighter and more object-centered; ViT rollout maps are more diffuse. Among ViTs, DINO attention is the most foreground-aligned — consistent with the quantitative Pointing Game results.
 
 ---
 

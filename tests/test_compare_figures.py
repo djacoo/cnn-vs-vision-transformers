@@ -1,3 +1,4 @@
+import pytest
 import torch
 
 from viz.compare_figures import denormalize, overlay_heatmap
@@ -18,3 +19,20 @@ def test_overlay_heatmap_returns_rgb_image():
     heat = torch.rand(224, 224)
     blended = overlay_heatmap(image, heat)
     assert blended.shape == (224, 224, 3)
+
+
+@pytest.mark.slow
+def test_build_multi_method_figure_produces_file(tmp_path):
+    """Integration test: requires real checkpoints in experiments/."""
+    from viz.compare_figures import build_multi_method_figure
+    out = tmp_path / "multi_method_comparison.png"
+    result = build_multi_method_figure(
+        cnn_run="experiments/resnet50",
+        vit_runs=["experiments/vit_b16_ft", "experiments/vit_b16_linprobe",
+                  "experiments/vit_s16_dino_linprobe"],
+        n_images=2,
+        out_path=str(out),
+    )
+    assert out.exists()
+    assert out.stat().st_size > 0
+    assert result == str(out)

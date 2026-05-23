@@ -1,0 +1,11 @@
+{
+  "accuracy": 0.8841646225129463,
+  "n_test": 3669,
+  "model": "ViT-B-32-quickgelu",
+  "pretrained": "openai",
+  "n_templates": 4,
+  "preprocess": "clip",
+  "macro_precision": 0.8920244190886274,
+  "macro_recall": 0.8819477071490112,
+  "macro_f1": 0.8812790401482734
+}

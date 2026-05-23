@@ -3,7 +3,12 @@ import argparse
 import json
 from pathlib import Path
 
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 import torch
+from sklearn.metrics import (ConfusionMatrixDisplay, confusion_matrix,
+                             precision_recall_fscore_support)
 from tqdm import tqdm
 
 from src.utils import get_device, get_logger, set_seed
@@ -74,25 +79,44 @@ def zero_shot_evaluate(model_name="ViT-B-32-quickgelu", pretrained="openai",
     text_features = _build_text_features(model, tokenizer, class_names,
                                          templates, device)
 
-    correct = total = 0
+    y_true, y_pred = [], []
     for images, targets in tqdm(test_loader, desc="clip zero-shot"):
         images = images.to(device)
         image_features = model.encode_image(images)
         image_features = image_features / image_features.norm(dim=-1, keepdim=True)
         logits = 100.0 * image_features @ text_features.T
         preds = logits.argmax(1).cpu()
-        correct += (preds == targets).sum().item()
-        total += targets.numel()
+        y_pred.extend(preds.tolist())
+        y_true.extend(targets.tolist())
 
+    correct = sum(int(a == b) for a, b in zip(y_true, y_pred))
+    total = len(y_true)
     accuracy = correct / total
+    precision, recall, f1, _ = precision_recall_fscore_support(
+        y_true, y_pred, average="macro", zero_division=0)
+
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
+
+    # Confusion matrix figure
+    cm = confusion_matrix(y_true, y_pred)
+    fig, ax = plt.subplots(figsize=(14, 14))
+    ConfusionMatrixDisplay(cm, display_labels=class_names).plot(
+        ax=ax, xticks_rotation="vertical", colorbar=False)
+    ax.set_title("CLIP zero-shot — Confusion matrix")
+    fig.tight_layout()
+    fig.savefig(out / "confusion_matrix.png", dpi=150)
+    plt.close(fig)
+
     metrics = {"accuracy": accuracy, "n_test": total, "model": model_name,
                "pretrained": pretrained, "n_templates": len(templates),
-               "preprocess": "clip"}
+               "preprocess": "clip",
+               "macro_precision": float(precision),
+               "macro_recall": float(recall),
+               "macro_f1": float(f1)}
     (out / "test_metrics.json").write_text(json.dumps(metrics, indent=2))
-    logger.info("clip zero-shot test_acc=%.4f templates=%d n_test=%d",
-                accuracy, len(templates), total)
+    logger.info("clip zero-shot test_acc=%.4f macro_f1=%.4f templates=%d n_test=%d",
+                accuracy, f1, len(templates), total)
     return metrics
 
 
