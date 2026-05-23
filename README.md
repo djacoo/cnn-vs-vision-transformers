@@ -1,8 +1,18 @@
 # CNN vs Vision Transformer — Where Does the Model Look?
 
-A comparative study of CNN and Vision-Transformer image classifiers on the Oxford-IIIT Pets fine-grained dataset, focused on accuracy, parameter/compute cost, transfer-learning protocol, and — most distinctively — *where* each model looks, measured both qualitatively (Grad-CAM, attention rollout, DINO self-attention) and quantitatively (Pointing Game, Bbox-IoU, Deletion/Insertion AUC).
+![Python](https://img.shields.io/badge/python-3.12-3776AB?logo=python&logoColor=white)
+![PyTorch](https://img.shields.io/badge/pytorch-2.3%2B-EE4C2C?logo=pytorch&logoColor=white)
+![torchvision](https://img.shields.io/badge/torchvision-0.18%2B-EE4C2C?logo=pytorch&logoColor=white)
+![timm](https://img.shields.io/badge/timm-1.0%2B-FFD21E?logo=huggingface&logoColor=black)
+![open_clip](https://img.shields.io/badge/open__clip-2.24%2B-5C3EE8)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-1.4%2B-F7931E?logo=scikit-learn&logoColor=white)
+![Matplotlib](https://img.shields.io/badge/matplotlib-3.8%2B-11557C)
+![Jupyter](https://img.shields.io/badge/jupyter-notebook-F37626?logo=jupyter&logoColor=white)
+![pytest](https://img.shields.io/badge/tests-49%20passing-brightgreen?logo=pytest&logoColor=white)
+![MPS](https://img.shields.io/badge/Apple%20Silicon-MPS-000000?logo=apple&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
-**Deep Learning project — University of Verona, A.Y. 2025–26.**
+A comparative study of CNN and Vision-Transformer image classifiers on the Oxford-IIIT Pets fine-grained dataset, focused on accuracy, parameter/compute cost, transfer-learning protocol, and — most distinctively — *where* each model looks, measured both qualitatively (Grad-CAM, attention rollout, DINO self-attention) and quantitatively (Pointing Game, Bbox-IoU, Deletion/Insertion AUC).
 
 ---
 
@@ -62,8 +72,8 @@ The five baseline variants plus the two extension variants:
 | 3 | `vit_s16_scratch` | ViT-S/16 | none | from scratch | Isolates pretraining (data-hunger probe) |
 | 4 | `deit_s16_ft` | DeiT-S/16 | ImageNet | full fine-tune | Data-efficient transformer |
 | 5 | `vit_b16_linprobe` | ViT-B/16 | ImageNet | linear probe | Protocol study vs #2 |
-| 6 | `vit_s16_dino_linprobe` | ViT-S/16 | DINO (self-supervised) | linear probe | Self-supervised pretraining (lecture 5B) |
-| — | `clip_zeroshot` | CLIP ViT-B/32 | image-text contrastive | zero-shot | Vision-language baseline (lecture 10) |
+| 6 | `vit_s16_dino_linprobe` | ViT-S/16 | DINO (self-supervised) | linear probe | Self-supervised pretraining |
+| — | `clip_zeroshot` | CLIP ViT-B/32 | image-text contrastive | zero-shot | Vision-language baseline |
 
 ---
 
@@ -91,13 +101,13 @@ Per-variant artifacts (confusion matrix, training curves) live in `report/figure
 
 ## Extensions Overview
 
-Six additional analyses, each tied to a course lecture topic.
+Six additional analyses extending the baseline comparison.
 
-1. **DINO self-supervised 6th variant (`vit_s16_dino_linprobe`)** — ViT-S/16 with DINO ImageNet-pretrained weights, frozen backbone, trained only via a 14 k-parameter linear head. Probes whether self-supervised features (no labels in pretraining) match supervised ones for transfer. *Lecture 5B — Self-Supervised Learning.* Reaches **0.9081** test accuracy in 117 seconds, on par with the supervised linear probe.
-2. **CLIP zero-shot baseline (`src/clip_zeroshot.py`)** — OpenAI CLIP ViT-B/32 (QuickGELU weights) with a 4-template prompt ensemble: `"a photo of a {}, a type of pet."`, `"a photo of a {}."`, `"a picture of a {} pet."`, `"an image of a {} cat or dog."`. No training. *Lecture 10 — Vision-Language Models.* Reaches **0.8842** test accuracy out of the box.
+1. **DINO self-supervised 6th variant (`vit_s16_dino_linprobe`)** — ViT-S/16 with DINO ImageNet-pretrained weights, frozen backbone, trained only via a 14 k-parameter linear head. Probes whether self-supervised features (no labels in pretraining) match supervised ones for transfer. Reaches **0.9081** test accuracy in 117 seconds, on par with the supervised linear probe.
+2. **CLIP zero-shot baseline (`src/clip_zeroshot.py`)** — OpenAI CLIP ViT-B/32 (QuickGELU weights) with a 4-template prompt ensemble: `"a photo of a {}, a type of pet."`, `"a photo of a {}."`, `"a picture of a {} pet."`, `"an image of a {} cat or dog."`. No training. Reaches **0.8842** test accuracy out of the box.
 3. **DINO per-head attention visualization (`viz/dino_attention.py`)** — extracts the last block's per-head CLS-token attention, upsamples to image resolution, and renders the per-head + mean attention overlaid on six pet images. Demonstrates the emergent object-centric attention claim from the DINO paper.
 4. **Quantitative saliency metrics (`src/saliency_metrics.py`)** — computes Pointing Game, Bbox-IoU @ top-k, Deletion AUC and Insertion AUC against Oxford-IIIT Pet head bounding boxes (`src/pet_bboxes.py`) on 200 validation images per variant. *Closes the loop on "where is the model looking?" by replacing eyeballing with numbers.*
-5. **Data-efficiency sweep (`src/data_efficiency.py`)** — re-trains each supervised variant at 10 / 25 / 50 / 100% training fractions (stratified subsample) and records test accuracy. *Lecture 7A — Transfer Learning.* Quantifies how much each architecture/protocol benefits from more labels.
+5. **Data-efficiency sweep (`src/data_efficiency.py`)** — re-trains each supervised variant at 10 / 25 / 50 / 100% training fractions (stratified subsample) and records test accuracy. Quantifies how much each architecture/protocol benefits from more labels.
 6. **t-SNE feature embeddings (`viz/embeddings.py`)** — 2-D t-SNE projection of the penultimate features across four representative variants, colored by class. Visualizes cluster quality of learned representations.
 7. **Failure-case mosaic (`viz/failures.py`)** — for the top-K most-confused breed pairs in the ViT-B FT confusion matrix, renders the original image, CNN Grad-CAM, and ViT rollout overlays. Surfaces the residual fine-grained errors.
 
@@ -325,19 +335,6 @@ pytest -m slow  # additionally runs the dataset-download integration tests (3)
 ```
 
 Coverage spans: dataset loading, stratified split determinism, every model branch of `build_model`, the training loop, evaluation metrics, Grad-CAM hook lifecycle, attention rollout shape and head-fusion correctness, DINO per-head attention extractor (and hook cleanup), CLIP zero-shot logits + prompt ensembling, VOC bounding-box parser, saliency metrics (pointing game, bbox-IoU, deletion/insertion AUC), data-efficiency sweep glue, t-SNE embedding panel, and the failure-case mosaic.
-
----
-
-## References to Course Lectures
-
-| Lecture | Topic | Where it appears in this project |
-|---|---|---|
-| 1B / 1C | CNN architectures, ResNet | `resnet50` variant; Grad-CAM saliency |
-| 4 | Attention, Transformers, ViT/DeiT | `vit_b16_ft`, `vit_s16_scratch`, `deit_s16_ft`; attention rollout |
-| 5B | Self-supervised learning, DINO | `vit_s16_dino_linprobe`; per-head DINO attention figure |
-| 6 | Noisy labels / robust learning | Discussed in future work; not implemented (Pets has clean labels) |
-| 7A | Transfer learning, fine-tune vs linear probe | `vit_b16_linprobe` baseline; full data-efficiency sweep |
-| 10 | Vision-language models, CLIP | `clip_zeroshot` baseline with prompt ensembling |
 
 ---
 
