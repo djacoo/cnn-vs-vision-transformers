@@ -35,7 +35,7 @@ Per-row notes:
 | Variant / Analysis | Backbone | Protocol | Test acc | Macro F1 | Trainable | Train time | Notes |
 |---|---|---|---|---|---|---|---|
 | `vit_s16_dino_linprobe` | ViT-S/16 | DINO self-sup pretraining → linear probe | **0.9081** | 0.9076 | 0.014 M | 117 s | Best val acc 0.9375 at epoch 9; 17 epochs run before early stop |
-| `clip_zeroshot` | CLIP ViT-B/32 | zero-shot inference (no training) | **0.8842** | — | 0 | inference only | 4-template prompt ensemble; CLIP's own preprocessing; `n_test=3669`; ViT-B-32-quickgelu weights to match OpenAI's QuickGELU activation (+4.94 pp vs non-QuickGELU checkpoint) |
+| `clip_zeroshot` | CLIP ViT-B/32 | zero-shot inference (no training) | **0.8842** | 0.8813 | 0 | inference only | 4-template prompt ensemble; CLIP's own preprocessing; `n_test=3669`; ViT-B-32-quickgelu weights to match OpenAI's QuickGELU activation (+4.94 pp vs non-QuickGELU checkpoint) |
 
 CLIP templates (averaged in text-embedding space): `"a photo of a {}, a type of pet."`, `"a photo of a {}."`, `"a picture of a {} pet."`, `"an image of a {} cat or dog."`.
 
@@ -82,7 +82,7 @@ Raw per-run CSV: `experiments_data_eff/results.csv`.
 
 ---
 
-## 5. Visualization runs (4)
+## 5. Visualization runs (5)
 
 | Figure | Source | Notes |
 |---|---|---|
@@ -90,6 +90,7 @@ Raw per-run CSV: `experiments_data_eff/results.csv`.
 | `report/figures/tsne_embeddings.png` | `viz/embeddings.py` | 4 variants (`resnet50`, `vit_b16_ft`, `vit_s16_scratch`, `vit_s16_dino_linprobe`), colored by class |
 | `report/figures/failure_cases.png` | `viz/failures.py` | Top-5 most-confused breed pairs in ViT-B FT confusion matrix |
 | `report/figures/saliency_metrics.png` | `viz/saliency_metrics_plot.py` | Bar chart of 4 metrics × 6 variants (scratch now included) |
+| `report/figures/multi_method_comparison.png` | `viz/compare_figures.build_multi_method_figure` | 6 images × 5 columns: original \| ResNet Grad-CAM \| ViT-B FT rollout \| ViT-B linprobe rollout \| DINO rollout |
 
 ---
 
